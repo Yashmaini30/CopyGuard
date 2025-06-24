@@ -5,6 +5,8 @@ import datetime
 import os
 import logging
 from botocore.exceptions import ClientError
+import re
+
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -13,6 +15,36 @@ s3 = boto3.client('s3')
 bedrock = boto3.client("bedrock-runtime")
 
 S3_BUCKET = os.environ.get('S3_BUCKET')
+
+def parse_response(text):
+    confidence_score = None
+    label = None
+
+    match = re.search(
+        r"(?:estimate|confidence(?: score)?(?: of)?)\D{0,10}(\d{1,3})\s*(?:%|percent)?",
+        text,
+        re.IGNORECASE
+    )
+
+    if match:
+        try:
+            confidence_score = int(match.group(1))
+        except (IndexError, ValueError):
+            confidence_score = None 
+
+    if "AI-generated" in text or "language model" in text:
+        label = "AI-generated"
+    elif "written by a human" in text or "not AI-generated" in text:
+        label = "Human-written"
+    else:
+        label = "Unknown"
+
+    return {
+        "label": label,
+        "confidence": confidence_score,
+        "raw": text
+    }
+
 
 def lambda_handler(event, context):
     try:
@@ -54,9 +86,14 @@ def lambda_handler(event, context):
 
         logger.info("Result stored at S3 key: %s", file_key)
 
+        parsed = parse_response(model_response.get("completion", ""))
+
         return {
             "statusCode": 200,
-            "body": json.dumps({ "result": model_response, "s3_key": file_key })
+            "body": json.dumps({ 
+                "result": parsed, 
+                "s3_key": file_key 
+            })
         }
     
     except ValueError as ve:
