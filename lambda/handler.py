@@ -1,5 +1,13 @@
 import boto3
 import json
+import uuid
+import datetime
+import os
+
+s3 = boto3.client('s3')
+bedrock = boto3.client("bedrock-runtime")
+
+S3_BUCKET = os.environ.get('S3_BUCKET')
 
 def lambda_handler(event, context):
     body = json.loads(event['body'])
@@ -21,6 +29,17 @@ def lambda_handler(event, context):
     )
 
     model_response = json.loads(response['body'].read().decode())
+    file_key = f"results/{datetime.datetime.utcnow().isoformat()}_{uuid.uuid4().hex}.json"
+
+    s3.put_object(
+        Bucket=S3_BUCKET,
+        Key=file_key,
+        Body=json.dumps({
+            "input_code": code,
+            "analysis_result": model_response
+        }),
+        ContentType='application/json'
+    )
     return {
         "statusCode": 200,
         "body": json.dumps({ "result": model_response })
