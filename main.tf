@@ -40,6 +40,18 @@ resource "aws_iam_policy" "bedrock_policy" {
           "logs:PutLogEvents"
         ],
         "Resource" = "*"
+      },
+      {
+        "Effect" = "Allow",
+        "Action" = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket"
+        ],
+        "Resource" = [
+          aws_s3_bucket.code_results.arn,
+          "${aws_s3_bucket.code_results.arn}/*"
+        ]
       }
     ]
   })
@@ -58,6 +70,12 @@ resource "aws_lambda_function" "code_detector" {
   filename            = "${path.module}/lambda/code_detector.zip"
   source_code_hash    = filebase64sha256("${path.module}/lambda/code_detector.zip")
   timeout             = 30
+
+  environment {
+    variables = {
+      S3_BUCKET = aws_s3_bucket.code_results.bucket
+    }
+  }
 }
 
 resource "aws_apigatewayv2_api" "api" {
@@ -89,4 +107,13 @@ resource "aws_lambda_permission" "apigw" {
   function_name = aws_lambda_function.code_detector.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.api.execution_arn}/*/*"
+}
+
+resource "aws_s3_bucket" "code_results" {
+  bucket = "${var.s3_bucket_name}-${random_id.suffix.hex}"
+  force_destroy = true
+}
+
+resource "random_id" "suffix" {
+  byte_length = 4
 }
