@@ -52,6 +52,14 @@ resource "aws_iam_policy" "bedrock_policy" {
           aws_s3_bucket.code_results.arn,
           "${aws_s3_bucket.code_results.arn}/*"
         ]
+      },
+      {
+        "Effect" = "Allow",
+        "Action" = [
+          "cloudwatch:PutMetricData",
+          "cloudwatch:GetMetricData"
+        ],
+        "Resource" = "*"
       }
     ]
   })
@@ -74,6 +82,7 @@ resource "aws_lambda_function" "code_detector" {
   environment {
     variables = {
       S3_BUCKET = aws_s3_bucket.code_results.bucket
+      METRIC_NS = "CodeDetector"
     }
   }
 }
@@ -116,4 +125,26 @@ resource "aws_s3_bucket" "code_results" {
 
 resource "random_id" "suffix" {
   byte_length = 4
+}
+
+resource "aws_cloudwatch_log_group" "lambda_logs" {
+  name              = "/aws/lambda/${aws_lambda_function.code_detector.function_name}"
+  retention_in_days = 60
+  
+}
+
+resource "aws_cloudwatch_metric_alarm" "lambda_errors_high" {
+  alarm_name          = "CodeDetectorLambdaErrors"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = 1
+  metric_name         = "Errors"
+  namespace           = "AWS/Lambda"
+  period              = 300              
+  statistic           = "Sum"
+  threshold           = 1                
+  dimensions = {
+    FunctionName = aws_lambda_function.code_detector.function_name
+  }
+  alarm_description   = "Lambda is throwing errors"
+  treat_missing_data  = "notBreaching"
 }
