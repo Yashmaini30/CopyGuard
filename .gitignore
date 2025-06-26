@@ -6,4 +6,7 @@ terraform.tfstate.backup
 .terraform.tfvars.json
 *.tfstate
 ,terraform.tfstate.lock.info
-variables.tf    
+variables.tf  
+frontend/.env
+frontend/node_modules
+frontend/dist  
