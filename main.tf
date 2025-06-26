@@ -148,3 +148,48 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors_high" {
   alarm_description   = "Lambda is throwing errors"
   treat_missing_data  = "notBreaching"
 }
+
+resource "aws_iam_role" "grafana_service" {
+  name = "GrafanaServiceRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = { Service = "grafana.amazonaws.com" },
+      Action   = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "grafana_cw_attach" {
+  role       = aws_iam_role.grafana_service.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchReadOnlyAccess"
+}
+
+resource "aws_grafana_workspace" "code_detector_grafana" {
+  name                     = "code-detector-grafana"
+  account_access_type      = "CURRENT_ACCOUNT"
+  authentication_providers = ["AWS_SSO"]
+  data_sources             = ["CLOUDWATCH"]
+  role_arn                 = aws_iam_role.grafana_service.arn  
+  permission_type          = "SERVICE_MANAGED"
+}
+
+data "aws_identitystore_user" "grafana_admin" {
+  identity_store_id = var.identitystore_id        
+
+  alternate_identifier {
+    unique_attribute {
+      attribute_path  = "UserName"
+      attribute_value = var.grafana_admin_username   
+    }
+  }
+}
+
+resource "aws_grafana_role_association" "admin_user" {
+  workspace_id = aws_grafana_workspace.code_detector_grafana.id
+  role         = "ADMIN"
+  user_ids     = [data.aws_identitystore_user.grafana_admin.user_id]
+  group_ids    = []                                  
+}
