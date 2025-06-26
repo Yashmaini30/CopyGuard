@@ -1,123 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🧠 Code Detector</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-    h1 {
-      text-align: center;
-      font-size: 24px;
-      font-weight: 600;
-    }
-    textarea {
-      width: 100%;
-      height: 300px;
-      resize: vertical;
-      font-family: monospace;
-      font-size: 14px;
-      padding: 12px;
-    }
-    button {
-      padding: 12px;
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      margin-top: 12px;
-    }
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    .card {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 16px;
-      background-color: #fafafa;
-      margin-top: 20px;
-    }
-    pre {
-      white-space: pre-wrap;
-      font-size: 12px;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CopyGuard - Advanced Code Detection</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Code Detector</h1>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                COPY<span class="neon">GUARD</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#detect">Detect</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
 
-  <textarea id="codeInput" placeholder="Paste your code here..."></textarea>
-  <button id="detectBtn" onclick="detectCode()">Detect</button>
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>🧠 Code Detector</h1>
+            <p>Advanced AI-powered code analysis and detection system. Paste your code below to analyze patterns, detect potential issues, and get detailed insights.</p>
+        </div>
 
-  <div id="resultContainer" class="card" style="display:none;">
-    <p><strong>Label:</strong> <span id="label"></span></p>
-    <p><strong>Confidence:</strong> <span id="confidence"></span>%</p>
-    <pre><strong>Raw Output:</strong> <span id="raw"></span></pre>
-  </div>
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-label">📝 Code Input</div>
+            <textarea 
+                id="codeInput" 
+                class="code-textarea"
+                placeholder="Paste your code here...
 
-  <script>
-    const DETECTOR_URL = "https://lb108g71nc.execute-api.us-east-1.amazonaws.com/detect";
-    const DETECTOR_KEY = "super-secret-api-key-1234567890";
+Example:
+function detectCode() {
+    const code = document.getElementById('input').value;
+    // Your code analysis logic here
+    return analysis;
+}"
+            ></textarea>
+            <button id="detectBtn" class="detect-btn" onclick="detectCode()">
+                🔍 Analyze Code
+            </button>
+        </div>
 
-    async function detectCode() {
-      const code = document.getElementById("codeInput").value.trim();
-      const btn = document.getElementById("detectBtn");
-      const resultContainer = document.getElementById("resultContainer");
-      const label = document.getElementById("label");
-      const confidence = document.getElementById("confidence");
-      const raw = document.getElementById("raw");
+        <!-- Results Section -->
+        <div id="resultContainer" class="results-section">
+            <div class="results-header">📊 Analysis Results</div>
+            
+            <div class="result-item">
+                <div class="result-label">Detection Label</div>
+                <div id="label" class="result-value">-</div>
+            </div>
 
-      if (!code) return;
+            <div class="result-item">
+                <div class="result-label">Confidence Score</div>
+                <div id="confidence" class="result-value">-</div>
+                <div class="confidence-bar">
+                    <div id="confidenceBar" class="confidence-fill" style="width: 0%"></div>
+                </div>
+            </div>
 
-      btn.disabled = true;
-      btn.textContent = "Analyzing...";
-      resultContainer.style.display = "none";
+            <div class="result-item">
+                <div class="result-label">Raw Analysis Output</div>
+                <div id="raw" class="raw-output">-</div>
+            </div>
+        </div>
+    </div>
 
-      try {
-        const res = await fetch(DETECTOR_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": DETECTOR_KEY
-          },
-          body: JSON.stringify({ code })
-        });
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">
+            Made with ❤️ by <span class="footer-name">Yash</span>
+        </div>
+    </footer>
 
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(errText || `HTTP ${res.status}`);
-        }
-
-        let data;
-        try {
-          data = await res.json();
-        } catch (jsonErr) {
-          const rawResp = await res.text();
-          throw new Error(`Non‑JSON response: ${rawResp}`);
-        }
-
-        label.textContent = data.result.label;
-        confidence.textContent = data.result.confidence ?? "N/A";
-        raw.textContent = data.result.raw;
-        resultContainer.style.display = "block";
-      } catch (err) {
-        label.textContent = "Error";
-        confidence.textContent = "0";
-        raw.textContent = err.message;
-        resultContainer.style.display = "block";
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Detect";
-      }
-    }
-  </script>
+    <!-- Load environment variables first, then main script -->
+    <script src="config.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
