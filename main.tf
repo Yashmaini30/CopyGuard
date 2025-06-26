@@ -91,6 +91,13 @@ resource "aws_lambda_function" "code_detector" {
 resource "aws_apigatewayv2_api" "api" {
   name          = "CodeDetectorAPI"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_methods = ["POST", "OPTIONS"]
+    allow_origins = ["*"]
+    allow_headers = ["Content-Type", "x-api-key"]
+    max_age = 3600
+  }
 }
 
 resource "aws_apigatewayv2_integration" "lambda_integration" {
