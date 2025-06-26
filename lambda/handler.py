@@ -18,6 +18,7 @@ cloudwatch = boto3.client('cloudwatch')
 
 S3_BUCKET = os.environ.get('S3_BUCKET')
 METRIC_NAMESPACE = os.environ.get('METRIC_NS','CodeDetector')
+EXPECTED_API_KEY = os.environ.get('EXPECTED_API_KEY')
 
 def parse_response(text):
     confidence_score = None
@@ -50,6 +51,12 @@ def parse_response(text):
 
 
 def lambda_handler(event, context):
+
+    headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
+    if headers.get("x-api-key") != EXPECTED_API_KEY:
+        logger.warning("Unauthorized: missing/invalid X-API-Key")
+        return {"statusCode": 403, "body": json.dumps({"error": "Forbidden"})}
+    
     start = time.time()
     try:
         logger.info("Incoming event: %s", json.dumps(event))
