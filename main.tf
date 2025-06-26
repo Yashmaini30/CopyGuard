@@ -83,6 +83,7 @@ resource "aws_lambda_function" "code_detector" {
     variables = {
       S3_BUCKET = aws_s3_bucket.code_results.bucket
       METRIC_NS = "CodeDetector"
+      EXPECTED_API_KEY = var.detector_api_key
     }
   }
 }

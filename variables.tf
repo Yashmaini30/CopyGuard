@@ -11,3 +11,8 @@ variable "identitystore_id" {
 variable "grafana_admin_username" {
   description = "Username (or email) of the SSO user who should be Grafana Admin"
 }
+
+variable "detector_api_key" {
+  description = "Shared secret clients must send in X-API-Key"
+  type        = string
+}
