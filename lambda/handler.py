@@ -23,32 +23,107 @@ EXPECTED_API_KEY = os.environ.get('EXPECTED_API_KEY')
 def parse_response(text):
     confidence_score = None
     label = None
-
-    match = re.search(
-        r"(?:estimate|confidence(?: score)?(?: of)?)\D{0,10}(\d{1,3})\s*(?:%|percent)?",
-        text,
-        re.IGNORECASE
-    )
-
-    if match:
-        try:
-            confidence_score = int(match.group(1))
-        except (IndexError, ValueError):
-            confidence_score = None 
-
-    if "AI-generated" in text or "language model" in text:
-        label = "AI-generated"
-    elif "written by a human" in text or "not AI-generated" in text:
+    
+    # More flexible regex to capture confidence scores
+    # Looks for patterns like "confidence: 85%", "85% confident", "score of 75", etc.
+    confidence_patterns = [
+        r"confidence\s*(?:score|level)?\s*(?:of|is|:)?\s*(\d{1,3})\s*(?:%|percent)?",
+        r"(\d{1,3})\s*(?:%|percent)\s*confidence",
+        r"score\s*(?:of|is|:)?\s*(\d{1,3})\s*(?:%|percent)?",
+        r"(\d{1,3})\s*(?:%|percent)\s*(?:certain|sure|confident)",
+        r"estimate\s*(?:of|is|:)?\s*(\d{1,3})\s*(?:%|percent)?"
+    ]
+    
+    for pattern in confidence_patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            try:
+                confidence_score = int(match.group(1))
+                if 0 <= confidence_score <= 100:  # Validate range
+                    break
+            except (IndexError, ValueError):
+                continue
+    
+    # More precise label detection with context awareness
+    text_lower = text.lower()
+    
+    # Check for negation patterns first
+    negation_patterns = [
+        r"not\s+ai[- ]generated",
+        r"not\s+generated\s+by\s+ai",
+        r"not\s+from\s+(?:an?\s+)?ai",
+        r"doesn't\s+appear\s+to\s+be\s+ai",
+        r"unlikely\s+to\s+be\s+ai",
+        r"probably\s+not\s+ai"
+    ]
+    
+    # Check for positive AI indicators
+    ai_patterns = [
+        r"ai[- ]generated",
+        r"generated\s+by\s+(?:an?\s+)?ai",
+        r"(?:appears|seems|looks)\s+to\s+be\s+ai[- ]generated",
+        r"likely\s+ai[- ]generated",
+        r"probably\s+ai[- ]generated",
+        r"language\s+model\s+generated",
+        r"machine\s+generated",
+        r"artificial\s+intelligence",
+        r"ai\s+system",
+        r"generated\s+by.*ai",
+        r"confident.*ai",
+        r"suggests.*ai",
+        r"characteristic\s+of\s+ai",
+        r"hallmarks\s+of\s+ai"
+    ]
+    
+    # Check for positive human indicators
+    human_patterns = [
+        r"human[- ]written",
+        r"written\s+by\s+(?:a\s+)?human",
+        r"(?:appears|seems|looks)\s+to\s+be\s+human[- ]written",
+        r"likely\s+human[- ]written",
+        r"probably\s+human[- ]written",
+        r"human\s+(?:code|author|programmer)"
+    ]
+    
+    # Check patterns in order of specificity
+    if any(re.search(pattern, text_lower) for pattern in negation_patterns):
         label = "Human-written"
+    elif any(re.search(pattern, text_lower) for pattern in human_patterns):
+        label = "Human-written"
+    elif any(re.search(pattern, text_lower) for pattern in ai_patterns):
+        label = "AI-generated"
     else:
-        label = "Unknown"
-
+        # Enhanced fallback logic - look for key decision phrases
+        decision_phrases = [
+            r"confident.*(?:this|code).*(?:was|is).*ai",
+            r"confident.*ai.*generated",
+            r"suggests.*ai.*generation",
+            r"confident.*(?:this|code).*(?:was|is).*human",
+            r"confident.*human.*(?:wrote|written)",
+            r"suggests.*human.*(?:wrote|written)"
+        ]
+        
+        for phrase in decision_phrases:
+            if re.search(phrase, text_lower):
+                if 'ai' in phrase:
+                    label = "AI-generated"
+                else:
+                    label = "Human-written"
+                break
+        else:
+            # Final fallback - look for overall assessment context
+            if re.search(r"overall.*confident.*ai", text_lower):
+                label = "AI-generated"
+            elif re.search(r"overall.*confident.*human", text_lower):
+                label = "Human-written"
+            else:
+                label = "Unknown"
+    
     return {
         "label": label,
         "confidence": confidence_score,
         "raw": text
     }
-
 
 def lambda_handler(event, context):
 
