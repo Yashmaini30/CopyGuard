@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Code Detector Architecture</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .architecture-diagram {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .aws-region {
+            border: 3px dashed #FF9900;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            background: rgba(255, 153, 0, 0.05);
+            position: relative;
+        }
+        
+        .region-label {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #FF9900;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .service-tier {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .service-box {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            min-width: 180px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .service-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .service-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .cloudfront { background: #FF9900; }
+        .s3 { background: #569A31; }
+        .apigateway { background: #FF4B4B; }
+        .lambda { background: #FF9900; }
+        .bedrock { background: #9D5AAE; }
+        .cloudwatch { background: #2E86C1; }
+        .grafana { background: #F46800; }
+        .iam { background: #DD344C; }
+        
+        .service-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .service-desc {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .arrow {
+            font-size: 24px;
+            color: #FF9900;
+        }
+        
+        .flow-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .tier-label {
+            text-align: center;
+            font-weight: bold;
+            color: #FF9900;
+            margin: 15px 0;
+            font-size: 18px;
+        }
+        
+        .info-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            border-left: 4px solid #FF9900;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .info-card h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .info-card ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .info-card li {
+            margin: 5px 0;
+            color: #555;
+        }
+        
+        @media (max-width: 768px) {
+            .service-tier {
+                flex-direction: column;
+            }
+            
+            .flow-container {
+                flex-direction: column;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>COPYGUARD AWS ARCHITECTURE</h1>
+            <p>Serverless AI-Powered Code Analysis Platform</p>
+        </div>
+        
+        <div class="architecture-diagram">
+            <div class="aws-region">
+                <div class="region-label">AWS Region: us-east-1</div>
+                
+                <div class="tier-label">📱 Frontend Layer</div>
+                <div class="service-tier">
+                    <div class="service-box">
+                        <div class="service-icon cloudfront">CF</div>
+                        <div class="service-title">CloudFront</div>
+                        <div class="service-desc">Global CDN with Origin Access Control</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div class="service-box">
+                        <div class="service-icon s3">S3</div>
+                        <div class="service-title">S3 Frontend Bucket</div>
+                        <div class="service-desc">Static website hosting (HTML, CSS, JS)</div>
+                    </div>
+                </div>
+                
+                <div class="tier-label">🌐 API Layer</div>
+                <div class="service-tier">
+                    <div class="service-box">
+                        <div class="service-icon apigateway">API</div>
+                        <div class="service-title">API Gateway v2</div>
+                        <div class="service-desc">HTTP API with CORS<br>/detect endpoint</div>
+                    </div>
+                </div>
+                
+                <div class="tier-label">⚡ Compute Layer</div>
+                <div class="service-tier">
+                    <div class="service-box">
+                        <div class="service-icon lambda">λ</div>
+                        <div class="service-title">Lambda Function</div>
+                        <div class="service-desc">code-detector<br>Python 3.11 Runtime</div>
+                    </div>
+                </div>
+                
+                <div class="tier-label">🤖 AI & Storage Layer</div>
+                <div class="service-tier">
+                    <div class="service-box">
+                        <div class="service-icon bedrock">BR</div>
+                        <div class="service-title">Amazon Bedrock</div>
+                        <div class="service-desc">AI Model Integration<br>Code Analysis</div>
+                    </div>
+                    <div class="service-box">
+                        <div class="service-icon s3">S3</div>
+                        <div class="service-title">S3 Results Bucket</div>
+                        <div class="service-desc">Analysis results storage</div>
+                    </div>
+                </div>
+                
+                <div class="tier-label">📊 Monitoring & Security Layer</div>
+                <div class="service-tier">
+                    <div class="service-box">
+                        <div class="service-icon cloudwatch">CW</div>
+                        <div class="service-title">CloudWatch</div>
+                        <div class="service-desc">Logs, Metrics & Alarms</div>
+                    </div>
+                    <div class="service-box">
+                        <div class="service-icon grafana">GF</div>
+                        <div class="service-title">Managed Grafana</div>
+                        <div class="service-desc">Advanced Dashboards<br>AWS SSO Integration</div>
+                    </div>
+                    <div class="service-box">
+                        <div class="service-icon iam">IAM</div>
+                        <div class="service-title">IAM Roles</div>
+                        <div class="service-desc">Security & Permissions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>🔄 Data Flow</h2>
+            <div class="flow-container">
+                <div class="service-box" style="background: #e3f2fd;">
+                    <strong>1. User Request</strong><br>
+                    <small>Frontend → CloudFront → API Gateway</small>
+                </div>
+                <div class="arrow">→</div>
+                <div class="service-box" style="background: #fff3e0;">
+                    <strong>2. Processing</strong><br>
+                    <small>Lambda → Bedrock AI Analysis</small>
+                </div>
+                <div class="arrow">→</div>
+                <div class="service-box" style="background: #e8f5e8;">
+                    <strong>3. Storage</strong><br>
+                    <small>Results → S3 Bucket</small>
+                </div>
+                <div class="arrow">→</div>
+                <div class="service-box" style="background: #f3e5f5;">
+                    <strong>4. Monitoring</strong><br>
+                    <small>CloudWatch → Grafana</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <h2>📋 Architecture Details</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h4>🌍 Frontend Distribution</h4>
+                    <ul>
+                        <li>CloudFront CDN for global distribution</li>
+                        <li>S3 bucket with static website hosting</li>
+                        <li>Origin Access Control for security</li>
+                        <li>Dynamic config.js generation</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h4>🔌 API Integration</h4>
+                    <ul>
+                        <li>HTTP API Gateway v2</li>
+                        <li>CORS enabled for web access</li>
+                        <li>POST /detect endpoint</li>
+                        <li>API key authentication</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h4>🧠 AI Processing</h4>
+                    <ul>
+                        <li>Python 3.11 Lambda function</li>
+                        <li>Amazon Bedrock integration</li>
+                        <li>30-second timeout</li>
+                        <li>Environment-based configuration</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h4>🔒 Security & IAM</h4>
+                    <ul>
+                        <li>Least privilege IAM policies</li>
+                        <li>Bedrock model invocation rights</li>
+                        <li>S3 bucket access controls</li>
+                        <li>CloudWatch logging permissions</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h4>📊 Monitoring Stack</h4>
+                    <ul>
+                        <li>CloudWatch logs (60-day retention)</li>
+                        <li>Lambda error alarms</li>
+                        <li>Custom metrics namespace</li>
+                        <li>Managed Grafana with AWS SSO</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h4>💾 Storage Solutions</h4>
+                    <ul>
+                        <li>Frontend assets in S3</li>
+                        <li>Analysis results storage</li>
+                        <li>Random suffix for unique naming</li>
+                        <li>Force destroy enabled</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
