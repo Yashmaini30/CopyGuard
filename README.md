@@ -72,6 +72,60 @@ A sophisticated CopyGuard platform that analyzes code snippets to detect AI-gene
 
 ## 🚀 Quick Start
 
+### Prerequisites
+- AWS CLI configured with appropriate permissions
+- Terraform >= 1.0
+- Python 3.11
+- AWS Bedrock model access enabled
+
+### Deployment
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Yashmaini30/CopyGuard
+   cd CopyGuard
+   ```
+
+2. **Configure variables**
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   # Edit terraform.tfvars with your specific values as directed
+   ```
+
+3. **Deploy infrastructure**
+   ```bash
+   terraform init
+   terraform plan
+   terraform apply
+   ```
+
+4. **Access the application**
+   - Frontend: CloudFront distribution URL
+   - API: API Gateway endpoint URL
+
+### API Usage
+
+```bash
+curl -X POST https://your-api-endpoint/detect \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your-secret-key" \
+  -d '{
+    "code": "def fibonacci(n): return n if n <= 1 else fibonacci(n-1) + fibonacci(n-2)"
+  }'
+```
+
+**Response:**
+```json
+{
+  "result": {
+    "label": "Human-written",
+    "confidence": 85,
+    "raw": "This code appears to be human-written with 85% confidence..."
+  },
+  "s3_key": "results/2024-01-15T10:30:00.000Z_abc123.json"
+}
+```
+
 
 ## 💰 Cost Analysis
 
@@ -178,6 +232,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 ⭐ **Star this repository if you found it helpful!**
-
 
 
