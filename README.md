@@ -17,6 +17,7 @@ A sophisticated CopyGuard platform that analyzes code snippets to detect AI-gene
 - 💾 **Persistent Storage**: S3 integration for analysis results and audit trails
 
 ## 🏗️ Architecture
+![7f22499d-8563-4337-8eed-6e6a51fb250e-0](https://github.com/user-attachments/assets/e31aea78-9c74-4991-92b0-0d36f87648e4)
 
 
 ## 🛠️ Technology Stack
