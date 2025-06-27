@@ -1,0 +1,3 @@
+identitystore_id = "" // IAM Identity Store ID
+grafana_admin_username = "" // Grafana admin username in the IAM Identity Store
+detector_api_key = "" // API key for the detector service
