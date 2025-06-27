@@ -23,9 +23,7 @@ EXPECTED_API_KEY = os.environ.get('EXPECTED_API_KEY')
 def parse_response(text):
     confidence_score = None
     label = None
-    
-    # More flexible regex to capture confidence scores
-    # Looks for patterns like "confidence: 85%", "85% confident", "score of 75", etc.
+
     confidence_patterns = [
         r"confidence\s*(?:score|level)?\s*(?:of|is|:)?\s*(\d{1,3})\s*(?:%|percent)?",
         r"(\d{1,3})\s*(?:%|percent)\s*confidence",
@@ -39,15 +37,13 @@ def parse_response(text):
         if match:
             try:
                 confidence_score = int(match.group(1))
-                if 0 <= confidence_score <= 100:  # Validate range
+                if 0 <= confidence_score <= 100:  
                     break
             except (IndexError, ValueError):
                 continue
-    
-    # More precise label detection with context awareness
+
     text_lower = text.lower()
     
-    # Check for negation patterns first
     negation_patterns = [
         r"not\s+ai[- ]generated",
         r"not\s+generated\s+by\s+ai",
@@ -57,7 +53,6 @@ def parse_response(text):
         r"probably\s+not\s+ai"
     ]
     
-    # Check for positive AI indicators
     ai_patterns = [
         r"ai[- ]generated",
         r"generated\s+by\s+(?:an?\s+)?ai",
@@ -74,8 +69,7 @@ def parse_response(text):
         r"characteristic\s+of\s+ai",
         r"hallmarks\s+of\s+ai"
     ]
-    
-    # Check for positive human indicators
+
     human_patterns = [
         r"human[- ]written",
         r"written\s+by\s+(?:a\s+)?human",
@@ -85,7 +79,6 @@ def parse_response(text):
         r"human\s+(?:code|author|programmer)"
     ]
     
-    # Check patterns in order of specificity
     if any(re.search(pattern, text_lower) for pattern in negation_patterns):
         label = "Human-written"
     elif any(re.search(pattern, text_lower) for pattern in human_patterns):
@@ -93,7 +86,6 @@ def parse_response(text):
     elif any(re.search(pattern, text_lower) for pattern in ai_patterns):
         label = "AI-generated"
     else:
-        # Enhanced fallback logic - look for key decision phrases
         decision_phrases = [
             r"confident.*(?:this|code).*(?:was|is).*ai",
             r"confident.*ai.*generated",
@@ -111,7 +103,6 @@ def parse_response(text):
                     label = "Human-written"
                 break
         else:
-            # Final fallback - look for overall assessment context
             if re.search(r"overall.*confident.*ai", text_lower):
                 label = "AI-generated"
             elif re.search(r"overall.*confident.*human", text_lower):
