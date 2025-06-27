@@ -1,3 +1,11 @@
+let CONFIG = window.CodeDetectorConfig || {};
+
+function ensureConfig() {
+    if (CONFIG.apiUrl && CONFIG.apiKey) return true;
+    showNotification("Configuration missing! Please check config.js.", "error");
+    return false;
+}
+
 async function detectCode() {
     const code = document.getElementById("codeInput").value.trim();
     const btn = document.getElementById("detectBtn");
@@ -12,8 +20,7 @@ async function detectCode() {
         return;
     }
 
-    if (!CONFIG.DETECTOR_URL || !CONFIG.DETECTOR_KEY) {
-        showNotification("Configuration missing! Please check your environment variables.", "error");
+    if (!ensureConfig()) {
         return;
     }
 
@@ -24,11 +31,11 @@ async function detectCode() {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-        const response = await fetch(CONFIG.DETECTOR_URL, {
+        const response = await fetch(CONFIG.apiUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "x-api-key": CONFIG.DETECTOR_KEY
+                "x-api-key": CONFIG.apiKey
             },
             body: JSON.stringify({ 
                 code: code,
@@ -229,7 +236,7 @@ function initializeApp() {
         }
     });
 
-    if (!CONFIG.DETECTOR_URL || !CONFIG.DETECTOR_KEY) {
+    if (!ensureConfig()) {
         showNotification("Warning: Environment variables not configured properly!", "warning");
     }
 
