@@ -137,8 +137,25 @@ A sophisticated CopyGuard platform that analyzes code snippets to detect AI-gene
 - [ ] **Webhook Support**: Real-time notifications
 
 ## 📝 Project Structure
-
-
+```
+├── lambda/
+│   ├── dependency/         # Lambda dependencies
+│   ├── code_detector.zip   # Packaged Lambda function
+│   ├── handler.py          # Lambda function code
+│   └── requirements.txt    # Python dependencies
+|
+├── .gitignore             # Git ignore rules
+├── architecture.html      # Architecture documentation
+├── index.html             # Frontend web interface
+├── main.tf                # Terraform main configuration
+├── outputs.tf             # Terraform output values
+├── README.md              # This file
+├── script.js              # Frontend JavaScript logic
+├── styles.css             # Frontend styling
+├── terraform.tfvars       # Terraform variables (local config)
+├── terraform.tfvars.example # Example terraform variables
+└── variables.tf           # Terraform input variables
+```
 
 ## 🤝 Contributing
 
@@ -161,3 +178,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 ⭐ **Star this repository if you found it helpful!**
+
+
+
